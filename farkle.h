@@ -34,7 +34,15 @@ class Player{		//parent class for bots and humans
 		int turnsTaken;
 		bool keepCurrentTurn;	// 0 means I choose to roll again, 1 means I shall keep my points.
 	public:
-		
+		//struction
+		Player(){score=0;turnsTaken=0;};
+		~Player(){};
+		//getters
+		int get_score(){return score;};
+		int get_turnsTaken(){return turnsTaken;};
+		//methods
+		void addPoints(int points){score=score+points;};
+
 
 
 };
@@ -49,9 +57,14 @@ class Farkle{					//handles game logic, turn stuff, players and holds the geneti
 		int activePlayer; 		// index of who's turn it is
 		int activeTurnScore; 	// score of current dice rolls
 	public:
-		void readAI(){};		//reads the AI param settings from a genetic algorithm from file;
-		void storeAI(){};		//stores the AI param settings from a genetic algorithm into output file;
-};
+		//construct/destruct
+		Farkle(){};
+		Farkle(int inPlayers, int inHumans){};
+		~Farkle(){};
+		void readAI();		//reads the AI param settings from a genetic algorithm from file;
+		void storeAI();		//stores the AI param settings from a genetic algorithm into output file;
+
+};	
 
 class FarkleBot:public Player{			//implements the ai behavior, stores parameters,
 

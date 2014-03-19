@@ -1,6 +1,6 @@
 //farkle main
 #include <iostream>
-#include "farkle.h"
+
 using namespace std;
 
 int main(){
