@@ -29,7 +29,7 @@ Farkle::~Farkle(){
 
 bool Farkle::readAI(string filename, int botID){
 	fstream in;
-	in.open(filename, ios::in);
+	in.open(filename.c_str(), ios::in);
 	if(in.fail())
 		return 0; 
 	double temp = 0;
@@ -47,19 +47,19 @@ bool Farkle::readAI(string filename, int botID){
 
 bool Farkle::storeAI(string filename, int botID){
 	fstream out;
-	out.open(filename, ios::out);
+	out.open(filename.c_str(), ios::out);
 	if(out.fail())
 		return 0; 
-	out << Players[numHumans+botID]->params[0] << endl;
-	out << Players[numHumans+botID]->params[1] << endl;
-	out << Players[numHumans+botID]->params[2] << endl;
-	out << Players[numHumans+botID]->params[3] << endl;
+	out << Players[numHumans+botID]->get_param(0) << endl;
+	out << Players[numHumans+botID]->get_param(1) << endl;
+	out << Players[numHumans+botID]->get_param(2) << endl;
+	out << Players[numHumans+botID]->get_param(3) << endl;
 	return 1;
 }
 
 bool Farkle::saveResults(string filename){
 	fstream out;
-	out.open(filename, ios::out);
+	out.open(filename.c_str(), ios::out);
 	if(out.fail())
 		return 0; 
 	for(int i=0; i<numHumans;i++){
@@ -69,10 +69,10 @@ bool Farkle::saveResults(string filename){
 	}
 	for(int i=numHumans; i<numPlayers;i++){
 		out << "BotID= " << i << endl;
-		out << "param1= " << Players[numHumans+i]->get_param(0); << endl;
-		out << "param2= " << Players[numHumans+i]->get_param(1); << endl;
-		out << "param3= " << Players[numHumans+i]->get_param(2); << endl;
-		out << "param4= " << Players[numHumans+i]->get_param(3); << endl;
+		out << "param1= " << Players[numHumans+i]->get_param(0) << endl;
+		out << "param2= " << Players[numHumans+i]->get_param(1) << endl;
+		out << "param3= " << Players[numHumans+i]->get_param(2) << endl;
+		out << "param4= " << Players[numHumans+i]->get_param(3) << endl;
 		out << "Score= " << Players[numHumans+i]->get_score() << endl;
 		out << "Turns= " << Players[numHumans+i]->get_turnsTaken() << endl;
 		out << endl;

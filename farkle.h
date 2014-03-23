@@ -29,11 +29,11 @@ class Die{			// should be complete 3/12
 }; 
 
 class Player{		//parent class for bots and humans
-	private:
+	protected:
 		int score;
 		int turnsTaken;
 		bool keepCurrentTurn;	// 0 means I choose to roll again, 1 means I shall keep my points.
-
+		
 	public:
 		//struction
 		Player(){score=0;turnsTaken=0;};
@@ -43,8 +43,9 @@ class Player{		//parent class for bots and humans
 		int get_turnsTaken(){return turnsTaken;};
 		//methods
 		void addPoints(int points){score=score+points;};
-		virtual int* holdDice(int* rollResults, int numRolled);	//humans and bots will do this differently
+		virtual void holdDice(int* rollResults, int numRolled);	//humans and bots will do this differently
 		virtual void set_param(int paramID, double input);
+		virtual double get_param(int paramID);
 
 
 };
@@ -123,5 +124,6 @@ class FarkleBot:public Player{			//implements the ai behavior, stores parameters
 class Human:public Player{				// handles io for humans to play
 	public:
 		Human(){};
+		~Human(){};
 
 }; 
