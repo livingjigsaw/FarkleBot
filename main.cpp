@@ -1,4 +1,5 @@
 //farkle main
+#include "farkle.h"
 #include <iostream>
 
 using namespace std;
