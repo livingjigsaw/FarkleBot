@@ -79,3 +79,42 @@ bool Farkle::saveResults(string filename){
 	}
 	return 1;
 }
+
+void Farkle::playTurn(int playerID){
+	bool turnOver=0;
+	int numHeld=0;
+	int turnScore=0;
+	for(int i=0;i<6;i++){
+		Dice[i].reset();
+	}
+	while(!turnOver){
+		int results[6] = {0};
+		for(int i=0;i<6;i++){		// roll and save results
+			if(!Dice[i].get_held()){
+				Dice[i].roll();
+				results[i]= Dice[i].get_value();
+			}
+		}
+		bool hold[6]={0};
+		bool keepPoints = 0;
+		if(validRoll(results)){
+			Players[playerID]->chooseDice(results, hold, keepPoints);
+			turnScore += scoreRoll(results, hold);
+			if(keepPoints){
+				turnOver=true;
+				Players[playerID]->addpoints(turnScore);
+			}
+		}
+		else{
+			turnOver=true;
+		}
+
+
+	}
+}
+
+bool Farkle::playRound(){
+	for(int i=0; i<numPlayers;i++){
+		
+	}
+}

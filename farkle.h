@@ -68,10 +68,11 @@ class Farkle{					//handles game logic, turn stuff, players and holds the geneti
 		bool readAI(string filename, int botID);		//reads the AI param settings from a genetic algorithm from file; botID = place in array relative to other bots 0 indexed
 		bool storeAI(string filename, int botID);		//stores the AI param settings from a genetic algorithm into output file;
 		bool saveResults(string filename);	// writes scores to a txt file
-		void playRound();	//if player saves score over 10000, go to final round
+		void playTurn(int playerID);
+		bool playRound();	//if player saves score over 10000, go to final round by returning 1
 		void finalRound();  
-		bool validSave();	// this checks a player's saved dice to see if points were saved. really to make sure people didn't make a mistake
-		
+		bool validRoll(int[] results);	// this checks a group of results to see if points were saved. really to make sure people didn't make a mistake
+		int scoreRoll(int[] results, bool[] hold);
 		void playHumans(); // a game with human players
 		void trainBots();	// this takes instantiated bots in Players, deletes the losers, repopulates. this is the genetic algorithm!
 		/*
@@ -118,8 +119,7 @@ class FarkleBot:public Player{			//implements the ai behavior, stores parameters
 
 		double get_param(int paramID){return params[paramID];};
 		void set_param(int paramID, double input){params[paramID] = input;};
-		void chooseDice(int* diceValues, int numOfDice);	//this is where the decision of which dice the bot keeps
-		void takeTurn();
+		void chooseDice(int* diceValues, bool& toHold, bool& keep);	//this is where the decision of which dice the bot keeps, 0's in the array are not counted
 }; 
 
 class Human:public Player{				// handles io for humans to play
