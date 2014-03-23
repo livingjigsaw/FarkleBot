@@ -42,10 +42,10 @@ class Player{		//parent class for bots and humans
 		int get_score(){return score;};
 		int get_turnsTaken(){return turnsTaken;};
 		//methods
-		void addPoints(int points){score=score+points;};
-		virtual void holdDice(int* rollResults, int numRolled);	//humans and bots will do this differently
-		virtual void set_param(int paramID, double input);
-		virtual double get_param(int paramID);
+		void addPoints(int points){score=score+points;}
+		virtual void holdDice(int* rollResults, int numRolled){};	//humans and bots will do this differently
+		virtual void set_param(int paramID, double input){};
+		virtual double get_param(int paramID){return 0;};
 
 
 };
@@ -71,6 +71,7 @@ class Farkle{					//handles game logic, turn stuff, players and holds the geneti
 		void playRound();	//if player saves score over 10000, go to final round
 		void finalRound();  
 		bool validSave();	// this checks a player's saved dice to see if points were saved. really to make sure people didn't make a mistake
+		
 		void playHumans(); // a game with human players
 		void trainBots();	// this takes instantiated bots in Players, deletes the losers, repopulates. this is the genetic algorithm!
 		/*
@@ -98,7 +99,7 @@ class Farkle{					//handles game logic, turn stuff, players and holds the geneti
 
 class FarkleBot:public Player{			//implements the ai behavior, stores parameters,
 	private:
-		double params[4]; // points to array of AI parameters
+		double* params; // points to array of AI parameters
 		/*
 		here are the parameters tracked in game:
 			opponent's score / 10000
@@ -111,9 +112,9 @@ class FarkleBot:public Player{			//implements the ai behavior, stores parameters
 		the AI scores every possibility of each roll score against these parameters
 		*/
 	public:
-		FarkleBot(){params[0] = 0;params[1] = 0;params[2] = 0;params[3] = 0;};
+		FarkleBot(){params = new double[4]; params[0] = 0;params[1] = 0;params[2] = 0;params[3] = 0;};
 		//FarkleBot(double* inParams); //not sure if this is needed
-		~FarkleBot(){};
+		~FarkleBot(){delete [] params;};
 
 		double get_param(int paramID){return params[paramID];};
 		void set_param(int paramID, double input){params[paramID] = input;};
