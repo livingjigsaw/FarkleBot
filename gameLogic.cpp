@@ -132,11 +132,13 @@ void Farkle::playTurn(int playerID, bool isBotGame){
 int Farkle::playRound(bool isBotGame){
 	for(int i=0; i<numPlayers;i++){
 		if(!isBotGame){
-			cout << "It is Player " << i <<"'s turn\n";
+			cout << "It is Player " << i+1 <<"'s turn\n";
 			cout << "your current score is " << Players[i]->get_score() <<endl <<endl;
 		}
 		playTurn(i, isBotGame);
 		Players[i]->addTurn();
+		if(!isBotGame)
+			cout << "After this turn, your score is " << Players[i]->get_score() << endl;
 		if(!isBotGame && Players[i]->get_score()>10000)
 			return i;
 	}

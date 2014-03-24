@@ -49,5 +49,6 @@ void Farkle::playHumans(){
 		if(Players[i]->get_score() > Players[winner]->get_score())
 			winner = i;	
 	}
+	cout << "Player " << winner+1 << "won the game!\n";
 }
 
