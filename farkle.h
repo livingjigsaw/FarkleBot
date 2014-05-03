@@ -45,35 +45,43 @@ class Player{		//parent class for bots and humans
 		//methods
 		void addPoints(int points){score=score+points;};
 		virtual void chooseDice(int* rollResults, bool* hold, bool& keepPoints){};	//humans and bots will do this differently
-		virtual void set_param(int paramID, double input){};
-		virtual double get_param(int paramID){return 0;};
+		virtual void set_inputs(int inputID, double in){};
+		virtual double get_inputs(int inputID){return 0;};
 
 };
 
-class Farkle{					//handles game logic, turn stuff, players and holds the genetic algorithm for the next round
+class FarkleBot:public Player{			//implements the ai behavior, stores parameters,
 	private:
-		int numBots;
-		int numHumans;	
-		int numPlayers;		//if == 0, the game becomes a bot training match 
-		int numRounds;			// how many games will be played, mainly for training purposes
-		Die* Dice;				//becomes new Die[6];
-		Player** Players;		//becomes new Player[x], where x = numPlayers, but cannot be allocated at once as it will contain bots and humans (hence the **)
+		double* inputs; // points to array of AI inputs
+
 	public:
-		//construct/destruct
-		Farkle(){};	// needs to create same things as other constructor
-		Farkle(int inBots, int inHumans, int inNumRounds);
-		~Farkle();
-		bool readAI(string filename, int botID);		//reads the AI param settings from a genetic algorithm from file; botID = place in array relative to other bots 0 indexed
-		bool storeAI(string filename, int botID);		//stores the AI param settings from a genetic algorithm into output file;
-		bool saveResults(string filename);	// writes scores to a txt file
-		void playTurn(int playerID, bool isBotGame);	//gametype 0 for humans to know if cout is appropriate. kinda sour about this jank workaround
-		int playRound(bool isBotGame);	//if player saves score over 10000, go to final round by returning that player's ID, or -1 otherwise
-		void finalRound(int startID); 	//not used for bot training, as we want turns till 10000 and don't want turn order to skew results 
-		bool validRoll(int results[]);	// this checks a group of results to see if points were saved. really to make sure people didn't make a mistake
-		int scoreRoll(int results[], bool hold[]);
-		void playHumans(); // a game with human players
-		void trainBots();	// this takes instantiated bots in Players, deletes the losers, repopulates. this is the genetic algorithm!
-		/*
+		FarkleBot(){inputs = new double[4]; inputs[0] = 0;inputs[1] = 0;inputs[2] = 0;inputs[3] = 0;};
+		~FarkleBot(){delete [] inputs;};
+
+		virtual void chooseDice(int* diceValues, bool& toHold, bool& keep);	//this is where the decision of which dice the bot keeps, 0's in the array are not counted
+		virtual void saveAI(); //writes ai to file
+		virtual void readAI(); //reads AI from file
+}; 
+
+class Human:public Player{				// handles io for humans to play
+	public:
+		Human(){};
+		~Human(){};
+
+		void chooseDice(int rollResults[], bool hold[], bool& keepPoints);	//humans and bots will do this differently
+
+}; 
+
+class DrewBot:FarkleBot{
+
+};
+
+class LizBot:FarkleBot{
+
+};
+
+class ShouseBot:FarkleBot{
+/*
 			here i define a complicated system for finding the next generation. 
 			I think this way would have a high chance of giving us very good results
 			as well as lots of data we could export to a ROOT macro for nice data display
@@ -92,41 +100,47 @@ class Farkle{					//handles game logic, turn stuff, players and holds the geneti
 				params then made at avg - 2*step, avg - step, avg, avg+step, avg+2step
 			this puts 3 out of 5 children within 40% of the mean, quite close to forcing a gaussian distribution of children
 		*/
-		
+};
 
-};	
+class Farkle;
 
-class FarkleBot:public Player{			//implements the ai behavior, stores parameters,
+class PlayerFactory{	//factory class that makes the players
 	private:
-		double* params; // points to array of AI parameters
-		/*
-		here are the parameters tracked in game:
-			opponent's score / 10000
-			maximum opponent's score - my score / 10000; the bigger, the riskier we'll be as we are farther behind
-			current turn's score / 1000; 
-			number of dice left to roll/6
-			
-		the params should be a double from 0-1 that the results from above are multiplied with, moving towards a final decision 
-
-		the AI scores every possibility of each roll score against these parameters
-		*/
+		int numHuman;
+		int numDrewBot;
+		int numLizBot;
+		int numShouseBot;
 	public:
-		FarkleBot(){params = new double[4]; params[0] = 0;params[1] = 0;params[2] = 0;params[3] = 0;};
-		//FarkleBot(double* inParams); //not sure if this is needed
-		~FarkleBot(){delete [] params;};
+		PlayerFactory(){};
+		~PlayerFactory(){};
 
-		double get_param(int paramID){return params[paramID];};
-		void set_param(int paramID, double input){params[paramID] = input;};
-		void chooseDice(int* diceValues, bool& toHold, bool& keep);	//this is where the decision of which dice the bot keeps, 0's in the array are not counted
-}; 
+		void set_players(int inHuman, int inDrewBot, int inLizBot, int inShouseBot);
+		void makePlayers(Farkle& game); // passes info to the farkle class
+		Player* makeHuman(){Player* temp=new Human();return temp;};
+		Player* makeDrewBot();
+		LizBot* makeLizBot();
+		ShouseBot* makeShouseBot();
+};
 
-class Human:public Player{				// handles io for humans to play
+class Farkle{					//handles game logic, turn stuff, players and holds the genetic algorithm for the next round
+	friend class PlayerFactory;
+	private:
+		int numRounds;			// how many games will be played, mainly for training purposes
+		int numPlayers;
+		Die* Dice;				//becomes new Die[6];
+		Player** Players;		//becomes new Player[x], where x = numPlayers, but cannot be allocated at once as it will contain bots and humans (hence the **)
 	public:
-		Human(){};
-		~Human(){};
-
-		void chooseDice(int rollResults[], bool hold[], bool& keepPoints);	//humans and bots will do this differently
-
-
-
-}; 
+		//construct/destruct
+		Farkle();	// needs to create same things as other constructor
+		~Farkle();
+		
+		bool saveResults(string filename);	// writes scores to a txt file
+		void playTurn(int playerID, bool isBotGame);	
+		int playRound(bool isBotGame);	//if player saves score over 10000, go to final round by returning that player's ID, or -1 otherwise
+		void finalRound(int startID); 	//not used for bot training, as we want turns till 10000 and don't want turn order to skew results 
+		bool validRoll(int results[]);	// this checks a group of results to see if points were saved. really to make sure people didn't make a mistake
+		int scoreRoll(int results[], bool hold[]);
+		void playHumans(); // a game with human players, with a final round
+		void trainBots();	// this game does not have a final round, it continues until x number of bots pass 10000
+		
+};	
