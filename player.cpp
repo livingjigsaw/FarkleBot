@@ -36,19 +36,4 @@ void Human::chooseDice(int rollResults[], bool hold[], bool& keepPoints){
 	}
 }
 
-void Farkle::playHumans(){
-	int playerOver= -1;
-	while(playerOver == -1){
-		playerOver=playRound(0);
-	}
-	finalRound(playerOver);
-	int winner = playerOver;
-	for(int i=playerOver;i!=playerOver;++i){	// by starting at playerOver, only players who rolled first win in case of a tie, as you must exceed a current winner past 10000 to beat them
-		if(i==numPlayers)
-			i=0;
-		if(Players[i]->get_score() > Players[winner]->get_score())
-			winner = i;	
-	}
-	cout << "Player " << winner+1 << "won the game!\n";
-}
 

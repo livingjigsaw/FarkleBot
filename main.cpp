@@ -5,8 +5,11 @@
 using namespace std;
 
 int main(){
-	srand(time(NULL));	// sets global random seed based on system time, VERY IMPORTANT, may move to Farkle class
-	Farkle Game(0,2,1);
+	PlayerFactory factory;
+	factory.set_players(2,0,0,0);
+	Farkle Game;
+	factory.makePlayers(Game);
+	cout << "debug Main\n";
 	Game.playHumans();
 	
 	//Game.storeAI("test2.txt", 0);

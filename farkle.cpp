@@ -4,19 +4,10 @@
 #include <iostream>
 using namespace std;
 
-Farkle::Farkle(int inBots, int inHumans, int inNumRounds){	
-	numBots = inBots;
-	numHumans = inHumans;
-	numRounds = inNumRounds;
-	numPlayers = numHumans+numBots;
+Farkle::Farkle(){	
+	srand(time(NULL));
 	Dice = new Die[6];
-	Players = new Player*[numPlayers];
-	for(int i=0;i<numHumans;i++){
-		Players[i] = new Human();
-	}
-	for(int i=numHumans;i<numPlayers;i++){
-		Players[i] = new FarkleBot();
-	}
+	numPlayers=0;
 }	
 
 Farkle::~Farkle(){
@@ -27,7 +18,35 @@ Farkle::~Farkle(){
 	delete [] Dice;
 }
 
-bool Farkle::readAI(string filename, int botID){
+void PlayerFactory::set_players(int inHuman, int inDrewBot, int inLizBot, int inShouseBot){
+	numHuman=inHuman;
+	numDrewBot=inDrewBot;
+	numLizBot=inLizBot;
+	numShouseBot=inShouseBot;
+}
+
+
+void PlayerFactory::makePlayers(Farkle& game){
+	int temp = numHuman+numDrewBot+numLizBot+numShouseBot;
+	game.numPlayers = temp;
+	game.Players = new Player*[temp];
+	for(int i=0; i<numHuman;i++){
+		game.Players[i]=makeHuman();
+	}
+/*	for(int i=numHuman; i<numHuman+numDrewBot;i++){
+		game.Players[i]=makeDrewBot();
+	}
+	for(int i=numHuman+numDrewBot; i<numHuman+numDrewBot+numLizBot;i++){
+		game.Players[i]=makeLizBot();
+	}
+	for(int i=numHuman+numDrewBot+numLizBot; i<numPlayers;i++){
+		game.Players[i]=makeShouseBot();
+	}
+*/}
+
+/*  old AI functions, not used but may want the code for later
+
+bool Farkle::readAI(string filename){
 	fstream in;
 	in.open(filename.c_str(), ios::in);
 	if(in.fail())
@@ -56,26 +75,17 @@ bool Farkle::storeAI(string filename, int botID){
 	out << Players[numHumans+botID]->get_param(3) << endl;
 	return 1;
 }
+*/
 
 bool Farkle::saveResults(string filename){
 	fstream out;
 	out.open(filename.c_str(), ios::out);
 	if(out.fail())
 		return 0; 
-	for(int i=0; i<numHumans;i++){
+	for(int i=0; i<numPlayers;i++){
 		out << "PlayerID= " << i << endl;
 		out << "Score= " << Players[i]->get_score() << endl;
 		out << "Turns= " << Players[i]->get_turnsTaken() << endl;
-	}
-	for(int i=numHumans; i<numPlayers;i++){
-		out << "BotID= " << i << endl;
-		out << "param1= " << Players[numHumans+i]->get_param(0) << endl;
-		out << "param2= " << Players[numHumans+i]->get_param(1) << endl;
-		out << "param3= " << Players[numHumans+i]->get_param(2) << endl;
-		out << "param4= " << Players[numHumans+i]->get_param(3) << endl;
-		out << "Score= " << Players[numHumans+i]->get_score() << endl;
-		out << "Turns= " << Players[numHumans+i]->get_turnsTaken() << endl;
-		out << endl;
 	}
 	return 1;
 }
@@ -240,4 +250,20 @@ int Farkle::scoreRoll(int results[], bool hold[]){
 
 	return score;
 
+}
+
+void Farkle::playHumans(){
+	int playerOver= -1;
+	while(playerOver == -1){
+		playerOver=playRound(0);
+	}
+	finalRound(playerOver);
+	int winner = playerOver;
+	for(int i=playerOver;i!=playerOver;++i){	// by starting at playerOver, only players who rolled first win in case of a tie, as you must exceed a current winner past 10000 to beat them
+		if(i==numPlayers)
+			i=0;
+		if(Players[i]->get_score() > Players[winner]->get_score())
+			winner = i;	
+	}
+	cout << "Player " << winner+1 << "won the game!\n";
 }
