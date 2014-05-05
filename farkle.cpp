@@ -107,7 +107,13 @@ void Farkle::playTurn(int playerID, bool isBotGame){
 		bool hold[6]={0};
 		bool keepPoints = 0;
 		if(validRoll(results)){
-			Players[playerID]->chooseDice(results, hold, keepPoints);
+			bool holdIsValid=0;
+			while(!holdIsValid){
+				Players[playerID]->chooseDice(results, hold, keepPoints);
+				holdIsValid=validHold(results, hold);
+				if(!holdIsValid)
+					cout <<"\nYou need to choose valid dice to hold! Try again!\n\n";
+			}
 			turnScore += scoreRoll(results, hold);
 			int numHeld = 0;
 			for(int i=0;i<6;i++)
@@ -188,6 +194,60 @@ bool Farkle::validRoll(int results[]){
 		return 0;//FARKLE!
 }
 
+bool Farkle::validHold(int results[], bool held[]){
+	int tally[6]={0};
+	bool validDice[6]={0};
+	for(int i=0;i<6;i++){
+		if(results[i]!=0){
+			if(held[i]){
+				tally[results[i]-1]++;//only tally the dice that are held
+
+			}
+			else
+				validDice[i]=1; //any dice not being held can't affect the hold
+		}
+		else{
+			validDice[i]=1; //any dice not being rolled cannot make the choice invalid
+		}
+	}
+	int numQuads =0;
+	int numPairs=0;
+	for(int i=0;i<6;i++){
+		if(tally[i]==4)
+			numQuads++;
+		if(tally[i]==2)
+			numPairs++;
+	}
+
+	if((tally[0]==1&&tally[1]==1&&tally[2]==1&&tally[3]==1&&tally[4]==1&&tally[5]==1)||(numPairs==3)||(numQuads==1&&numPairs==1)){
+		validDice[0]=1;
+		validDice[1]=1;
+		validDice[2]=1;
+		validDice[3]=1;
+		validDice[4]=1;
+		validDice[5]=1;
+	}
+
+	for(int i=0;i<6;i++){
+		if(tally[i]>=3){
+			for(int j=0;j<6;j++){
+				if(Dice[j].get_value()-1 == i)
+					validDice[j]=1;
+			}
+		}
+		if(Dice[i].get_value()==1 || Dice[i].get_value()==5)
+			validDice[i]=1;
+	}
+
+	for(int i=0;i<6;i++){
+		if(validDice[i]!=1)
+			return false;
+	}
+
+	return true;
+
+}
+ 
 int Farkle::scoreRoll(int results[], bool hold[]){
 	int score=0;
 	int tally[6]={0};

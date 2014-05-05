@@ -13,6 +13,6 @@ int main(){
 	Game.playHumans();
 	
 	//Game.storeAI("test2.txt", 0);
-	//above lines are success!
+
 
 }

@@ -58,7 +58,7 @@ class FarkleBot:public Player{			//implements the ai behavior, stores parameters
 		FarkleBot(){inputs = new double[4]; inputs[0] = 0;inputs[1] = 0;inputs[2] = 0;inputs[3] = 0;};
 		~FarkleBot(){delete [] inputs;};
 
-		virtual void chooseDice(int* diceValues, bool& toHold, bool& keep);	//this is where the decision of which dice the bot keeps, 0's in the array are not counted
+		virtual void chooseDice(const int* diceValues, bool& toHold, bool& keep);	//this is where the decision of which dice the bot keeps, 0's in the array are not counted
 		virtual void saveAI(); //writes ai to file
 		virtual void readAI(); //reads AI from file
 }; 
@@ -73,14 +73,30 @@ class Human:public Player{				// handles io for humans to play
 }; 
 
 class DrewBot:FarkleBot{
-
+	public:
+		DrewBot(){};
+		~DrewBot(){};
+		void chooseDice(const int* diceValues, bool& toHold, bool& keep);
+		void saveAI();
+		void readAI();
 };
 
 class LizBot:FarkleBot{
-
+	public:
+		LizBot(){};
+		~LizBot(){};
+		void chooseDice(const int* diceValues, bool& toHold, bool& keep);
+		void saveAI();
+		void readAI();
 };
 
 class ShouseBot:FarkleBot{
+		public:
+		ShouseBot(){};
+		~ShouseBot(){};
+		void chooseDice(const int* diceValues, bool& toHold, bool& keep);
+		void saveAI();
+		void readAI();
 /*
 			here i define a complicated system for finding the next generation. 
 			I think this way would have a high chance of giving us very good results
@@ -139,6 +155,7 @@ class Farkle{					//handles game logic, turn stuff, players and holds the geneti
 		int playRound(bool isBotGame);	//if player saves score over 10000, go to final round by returning that player's ID, or -1 otherwise
 		void finalRound(int startID); 	//not used for bot training, as we want turns till 10000 and don't want turn order to skew results 
 		bool validRoll(int results[]);	// this checks a group of results to see if points were saved. really to make sure people didn't make a mistake
+		bool validHold(int results[], bool hold[]);	// this makes sure the held dice are legitimate.
 		int scoreRoll(int results[], bool hold[]);
 		void playHumans(); // a game with human players, with a final round
 		void trainBots();	// this game does not have a final round, it continues until x number of bots pass 10000
