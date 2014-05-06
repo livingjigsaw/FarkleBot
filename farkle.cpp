@@ -76,7 +76,7 @@ bool Farkle::storeAI(string filename, int botID){
 	return 1;
 }
 */
-
+//this is a demonstration
 bool Farkle::saveResults(string filename){
 	fstream out;
 	out.open(filename.c_str(), ios::out);
@@ -87,7 +87,7 @@ bool Farkle::saveResults(string filename){
 		out << "Score= " << Players[i]->get_score() << endl;
 		out << "Turns= " << Players[i]->get_turnsTaken() << endl;
 	}
-	return 1;
+	return 1; 
 }
 
 void Farkle::playTurn(int playerID, bool isBotGame){
