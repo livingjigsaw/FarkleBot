@@ -51,13 +51,10 @@ class Player{		//parent class for bots and humans
 
 };
 
-class FarkleBot:public Player{			//implements the ai behavior, stores parameters,
-	private:
-		double* inputs; // points to array of AI inputs
-
+class FarkleBot:public Player{
 	public:
-		FarkleBot(){inputs = new double[4]; inputs[0] = 0;inputs[1] = 0;inputs[2] = 0;inputs[3] = 0;};
-		~FarkleBot(){delete [] inputs;};
+		FarkleBot(){};
+		~FarkleBot(){};
 
 		virtual void chooseDice(const int* diceValues, bool& toHold, bool& keep);	//this is where the decision of which dice the bot keeps, 0's in the array are not counted
 		virtual void saveAI(); //writes ai to file
@@ -106,7 +103,9 @@ class ShouseBot:FarkleBot{
 
 		double get_param(int paramID){return params[paramID];};
 
-		void chooseDice(const int* diceValues, bool& toHold, bool& keep);
+		void chooseDice(const int* diceValues, bool& toHold, bool& keep){
+
+		};
 		void saveAI();
 		void readAI();
 /*
@@ -178,7 +177,7 @@ class PlayerFactory{	//factory class that makes the players
 		void makePlayers(Farkle& game, ShouseAlgorithm& SA); // passes info to the farkle class
 		Player* makeHuman(){Player* temp=new Human();return temp;};
 		Player* makeDrewBot();
-		LizBot* makeLizBot();
+		LizBot* makeLizBot(){Player* temp=new LizBot();return temp;};
 		ShouseBot* makeShouseBot();
 };
 

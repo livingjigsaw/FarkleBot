@@ -33,15 +33,15 @@ void PlayerFactory::makePlayers(Farkle& game, ShouseAlgorithm& SA){
 	for(int i=0; i<numHuman;i++){
 		game.Players[i]=makeHuman();
 	}
-/*	for(int i=numHuman; i<numHuman+numDrewBot;i++){
+	for(int i=numHuman; i<numHuman+numDrewBot;i++){
 		game.Players[i]=makeDrewBot();
 	}
 	for(int i=numHuman+numDrewBot; i<numHuman+numDrewBot+numLizBot;i++){
 		game.Players[i]=makeLizBot();
 	}
-	*/for(int i=0; i<numShouseBot;i++){
+	for(int i=0; i<numShouseBot;i++){
 		SA.myBots[i]=makeShouseBot();
-		game.Players[i+numHuman+numDreBot+numLizBot]=SA.myBots[i];
+		game.Players[i+numHuman+numDrewBot+numLizBot]=SA.myBots[i];
 	}
 }
 
