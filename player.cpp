@@ -2,7 +2,7 @@
 #include <iostream>
 using namespace std;
 
-void Human::chooseDice(int rollResults[], bool* hold, bool& keepPoints){
+void Human::chooseDice(int rollResults[], bool* hold, bool& keepPoints, int turnScore){
 	cout << "You rolled the following: \n";
 	for(int i=0;i<6;i++){
 		if(rollResults[i]!=0)
@@ -153,12 +153,12 @@ int Player::scoreRoll(int results[], bool hold[]){
 
 }
 
-void ShouseBot::chooseDice(const int* diceValues, bool& toHold, bool& keep){
+void ShouseBot::chooseDice(const int* diceValues, bool* toHold, bool& keep, int turnScore){
 	int botScore[64]={};//this scores each possibility
 	int rollScore[64]= {};
-	int numDiceLeft[64]={};
+	double diceTally[64]={};
 	bool holdData[64][6];
-	int heldVals[6]={};
+
 	for(int i=0;i<64;i++){
 		for(int j=0;j<6;j++){
 			holdData[i][j]=0;
@@ -199,18 +199,35 @@ void ShouseBot::chooseDice(const int* diceValues, bool& toHold, bool& keep){
 
 		if(botScore[i] >=0 && validHold(tempVals,holdData[i])){
 			rollScore[i]=scoreRoll(tempVals, holdData[i]);
-			int diceTally=0;
+		
 			for(int j=0;j<6;j++){
 				if(tempVals[i]!=0 && holdData[i][j]==0)
-					diceTally++;
+					diceTally[i]++;
 			}
-			if(diceTally==0)
-				diceTally=6;
+		if(diceTally[i]==0)
+			diceTally[i]=6;
+		
+		botScore[i]+=diceTally[i]*get_param(0)*10;
+		botScore[i]+=rollScore[i]*get_param(1)/300.0;
+		}
+	
 
-
+	}
+	double maxScore=0;
+	int maxIndex=0;
+	for(int i=0;i<64;i++){
+		if(botScore[i]>maxScore){
+			maxScore=botScore[i];
+			maxIndex=i;
 		}
 	}
-
+	if(botScore[maxIndex] > turnScore*get_param(2)/10)
+			keep=0;
+		else
+			keep=1;
+		for(int i=0;i<6;i++){
+			toHold[i]=holdData[maxIndex][i];
+		}
 
 
 

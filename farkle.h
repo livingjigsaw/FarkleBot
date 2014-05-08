@@ -47,7 +47,7 @@ class Player{		//parent class for bots and humans
 		void addPoints(int points){score=score+points;};
 		int scoreRoll(int results[], bool hold[]);
 		bool validHold(int results[], bool hold[]);	// this makes sure the held dice are legitimate.
-		virtual void chooseDice(int* rollResults, bool* hold, bool& keepPoints){};	//humans and bots will do this differently
+		virtual void chooseDice(int* rollResults, bool* hold, bool& keepPoints, int turnScore){};	//humans and bots will do this differently
 
 
 };
@@ -57,7 +57,7 @@ class FarkleBot:public Player{
 		FarkleBot(){};
 		virtual ~FarkleBot(){};
 
-		virtual void chooseDice(const int* diceValues, bool& toHold, bool& keep){};	//this is where the decision of which dice the bot keeps, 0's in the array are not counted
+		virtual void chooseDice(const int* diceValues, bool* toHold, bool& keep, int turnScore){};	//this is where the decision of which dice the bot keeps, 0's in the array are not counted
 		virtual void saveAI(){}; //writes ai to file
 		virtual void readAI(){}; //reads AI from file
 }; 
@@ -67,7 +67,7 @@ class Human:public Player{				// handles io for humans to play
 		Human(){};
 		~Human(){};
 
-		void chooseDice(int rollResults[], bool* hold, bool& keepPoints);	//humans and bots will do this differently
+		void chooseDice(int rollResults[], bool* hold, bool& keepPoints, int turnScore);	//humans and bots will do this differently
 
 }; 
 
@@ -75,7 +75,7 @@ class DrewBot:public FarkleBot{
 	public:
 		DrewBot(){};
 		~DrewBot(){};
-		void chooseDice(const int* diceValues, bool& toHold, bool& keep);
+		void chooseDice(const int* diceValues, bool* toHold, bool& keep, int turnScore);
 		void saveAI();
 		void readAI();
 };
@@ -84,7 +84,7 @@ class LizBot:public FarkleBot{
 	public:
 		LizBot(){};
 		~LizBot(){};
-		void chooseDice(const int* diceValues, bool& toHold, bool& keep);
+		void chooseDice(const int* diceValues, bool* toHold, bool& keep, int turnScore);
 		void saveAI();
 		void readAI();
 };
@@ -110,7 +110,7 @@ class ShouseBot:public FarkleBot{
 		double get_param(int paramID){return params[paramID];};
 		void set_param(int paramID, double val){params[paramID]=val;};
 
-		void chooseDice(const int* diceValues, bool& toHold, bool& keep);
+		void chooseDice(const int* diceValues, bool* toHold, bool& keep, int turnScore);
 		void saveAI(){};
 		void readAI(){};
 /*

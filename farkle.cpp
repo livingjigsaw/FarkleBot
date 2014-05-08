@@ -94,7 +94,7 @@ void Farkle::playTurn(int playerID, bool isBotGame){
 		if(validRoll(results)){
 			bool holdIsValid=0;
 			while(!holdIsValid){
-				Players[playerID]->chooseDice(results, hold, keepPoints);
+				Players[playerID]->chooseDice(results, hold, keepPoints, turnScore);
 				holdIsValid=validHold(results, hold);
 				if(!holdIsValid)
 					cout <<"\nYou need to choose valid dice to hold! Try again!\n\n";
