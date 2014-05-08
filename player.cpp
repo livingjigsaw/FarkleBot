@@ -2,7 +2,7 @@
 #include <iostream>
 using namespace std;
 
-void Human::chooseDice(int rollResults[], bool hold[], bool& keepPoints){
+void Human::chooseDice(int rollResults[], bool* hold, bool& keepPoints){
 	cout << "You rolled the following: \n";
 	for(int i=0;i<6;i++){
 		if(rollResults[i]!=0)
@@ -154,7 +154,7 @@ int Player::scoreRoll(int results[], bool hold[]){
 }
 
 void ShouseBot::chooseDice(const int* diceValues, bool& toHold, bool& keep){
-	int botScore[64]={};
+	int botScore[64]={};//this scores each possibility
 	int rollScore[64]= {};
 	int numDiceLeft[64]={};
 	bool holdData[64][6];
@@ -200,6 +200,12 @@ void ShouseBot::chooseDice(const int* diceValues, bool& toHold, bool& keep){
 		if(botScore[i] >=0 && validHold(tempVals,holdData[i])){
 			rollScore[i]=scoreRoll(tempVals, holdData[i]);
 			int diceTally=0;
+			for(int j=0;j<6;j++){
+				if(tempVals[i]!=0 && holdData[i][j]==0)
+					diceTally++;
+			}
+			if(diceTally==0)
+				diceTally=6;
 
 
 		}

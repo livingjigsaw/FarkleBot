@@ -67,7 +67,7 @@ class Human:public Player{				// handles io for humans to play
 		Human(){};
 		~Human(){};
 
-		void chooseDice(int rollResults[], bool hold[], bool& keepPoints);	//humans and bots will do this differently
+		void chooseDice(int rollResults[], bool* hold, bool& keepPoints);	//humans and bots will do this differently
 
 }; 
 

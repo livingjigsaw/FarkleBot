@@ -6,7 +6,7 @@ using namespace std;
 
 int main(){
 	PlayerFactory factory;
-	factory.set_players(2,0,0,1);
+	factory.set_players(2,0,0,0);
 	Farkle Game;
 	ShouseAlgorithm genetic(1);
 	factory.makePlayers(Game, genetic);
