@@ -45,8 +45,23 @@ void PlayerFactory::makePlayers(Farkle& game, ShouseAlgorithm& SA){
 	}
 }
 
+/*
 
 
+=======
+bool Farkle::storeAI(string filename, int botID){
+	fstream out;
+	out.open(filename.c_str(), ios::out);
+	if(out.fail())
+		return 0; 
+	out << Players[numHumans+botID]->get_param(0) << endl;
+	out << Players[numHumans+botID]->get_param(1) << endl;
+	out << Players[numHumans+botID]->get_param(2) << endl;
+	out << Players[numHumans+botID]->get_param(3) << endl;
+	return 1;
+}
+*/
+//this is a demonstration
 bool Farkle::saveResults(string filename){
 	fstream out;
 	out.open(filename.c_str(), ios::out);
@@ -57,7 +72,7 @@ bool Farkle::saveResults(string filename){
 		out << "Score= " << Players[i]->get_score() << endl;
 		out << "Turns= " << Players[i]->get_turnsTaken() << endl;
 	}
-	return 1;
+	return 1; 
 }
 
 void Farkle::playTurn(int playerID, bool isBotGame){
