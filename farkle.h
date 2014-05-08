@@ -45,20 +45,21 @@ class Player{		//parent class for bots and humans
 		void addTurn(){turnsTaken++;};
 		//methods
 		void addPoints(int points){score=score+points;};
+		int scoreRoll(int results[], bool hold[]);
+		bool validHold(int results[], bool hold[]);	// this makes sure the held dice are legitimate.
 		virtual void chooseDice(int* rollResults, bool* hold, bool& keepPoints){};	//humans and bots will do this differently
-		virtual void set_inputs(int inputID, double in){};
-		virtual double get_inputs(int inputID){return 0;};
+
 
 };
 
 class FarkleBot:public Player{
 	public:
 		FarkleBot(){};
-		~FarkleBot(){};
+		virtual ~FarkleBot(){};
 
-		virtual void chooseDice(const int* diceValues, bool& toHold, bool& keep);	//this is where the decision of which dice the bot keeps, 0's in the array are not counted
-		virtual void saveAI(); //writes ai to file
-		virtual void readAI(); //reads AI from file
+		virtual void chooseDice(const int* diceValues, bool& toHold, bool& keep){};	//this is where the decision of which dice the bot keeps, 0's in the array are not counted
+		virtual void saveAI(){}; //writes ai to file
+		virtual void readAI(){}; //reads AI from file
 }; 
 
 class Human:public Player{				// handles io for humans to play
@@ -70,7 +71,7 @@ class Human:public Player{				// handles io for humans to play
 
 }; 
 
-class DrewBot:FarkleBot{
+class DrewBot:public FarkleBot{
 	public:
 		DrewBot(){};
 		~DrewBot(){};
@@ -79,7 +80,7 @@ class DrewBot:FarkleBot{
 		void readAI();
 };
 
-class LizBot:FarkleBot{
+class LizBot:public FarkleBot{
 	public:
 		LizBot(){};
 		~LizBot(){};
@@ -88,7 +89,7 @@ class LizBot:FarkleBot{
 		void readAI();
 };
 
-class ShouseBot:FarkleBot{
+class ShouseBot:public FarkleBot{
 	private:
 		double* params;	
 		/*
@@ -98,16 +99,20 @@ class ShouseBot:FarkleBot{
 		param 4 weights leading opponent's score **not implementing this right now** this is difficult to do with current game's implementation! not passing in data from other players currently
 		*/
 	public:
-		ShouseBot(){params=new double [3];};
+		ShouseBot(){
+			params=new double [3];
+			params[0]=rand()%10;
+			params[1]=rand()%10;
+			params[2]=rand()%10;
+		};
 		~ShouseBot(){delete [] params;};
 
 		double get_param(int paramID){return params[paramID];};
+		void set_param(int paramID, double val){params[paramID]=val;};
 
-		void chooseDice(const int* diceValues, bool& toHold, bool& keep){
-
-		};
-		void saveAI();
-		void readAI();
+		void chooseDice(const int* diceValues, bool& toHold, bool& keep);
+		void saveAI(){};
+		void readAI(){};
 /*
 			here i define a complicated system for finding the next generation. 
 			I think this way would have a high chance of giving us very good results
@@ -132,32 +137,51 @@ class ShouseBot:FarkleBot{
 class ShouseAlgorithm{
 	friend class PlayerFactory;
 	private:
-		double numBots;	//might do math with this
-		int startIndex;	//this will be the index in Farkle where my bots begin
+		int numBots;	//might do math with this
 		ShouseBot** myBots;
 	public:
-		ShouseAlgorithm(double inBots, int inIndex){numBots=inBots;startIndex=inIndex; myBots=new ShouseBot*[numBots];};
+		ShouseAlgorithm(int inBots){numBots=inBots;myBots=new ShouseBot* [numBots];};
 		~ShouseAlgorithm(){delete [] myBots;};
 
-		Breed(){
-			double numMax = ceil(numBots/10); //determining how many bots to average, don't want non-int
-			double** max=new double[numMax];
-				for(int i=0;i<numMax;i++){
-					max[i]=new double[4];	// 1st is score, 2 3 4 are params
-				}
-				for(int i=0;i<numBots;i++){
-					double temp = myBots[i]->get_score();	// if score is greater than max score, save params from bot to array
-					if(max[0]<temp){
-						for(int i=numMax-1;i>0;i--){
-							max[i]=max[i-1];
-						}
-						max[0]=temp;
+		void Breed(){
+			int numMax = ceil(numBots/20); //determining how many bots to average, don't want non-int
+			double** max=new double*[numMax];
+			for(int i=0;i<numMax;i++){
+				max[i]=new double[4];	// 1st is score, 2 3 4 are params
+			}
+			for(int i=0;i<numBots;i++){
+				double temp = myBots[i]->get_score();	// if score is greater than max score, save params from bot to array
+				if(max[0][0]<temp){
+					for(int j=numMax-1;j>0;j--){
+						max[j][0]=max[j-1][0];
+						max[j][1]=max[j-1][1];
+						max[j][2]=max[j-1][2];
+						max[j][3]=max[j-1][3];
 					}
+					max[0][0]=temp;
+					max[0][1]=myBots[i]->get_param(0);
+					max[0][2]=myBots[i]->get_param(1);
+					max[0][3]=myBots[i]->get_param(2);
 				}
-				double avg =0;
-				for(int i=0;i<numMax;i++){
-					avg+=max[i];
-				}
+			}
+			double avg[3]={};
+			for(int i=0;i<numMax;i++){
+				avg[0]+=max[i][1];
+				avg[1]+=max[i][2];
+				avg[2]+=max[i][3];
+			}
+			avg[0]= avg[0]/numMax;
+			avg[1]= avg[1]/numMax;
+			avg[2]= avg[2]/numMax;
+			myBots[0]->set_param(0, avg[0]);
+			myBots[0]->set_param(1, avg[1]);
+			myBots[0]->set_param(2, avg[2]);
+			for(int i=1;i<numBots;i++){
+				myBots[i]->set_param(0, myBots[0]->get_param(0)+((rand()%40)/10.0)-2);
+				myBots[i]->set_param(1, myBots[0]->get_param(1)+((rand()%40)/10.0)-2);
+				myBots[i]->set_param(2, myBots[0]->get_param(2)+((rand()%40)/10.0)-2);
+
+			}
 		};
 };
 
@@ -177,8 +201,8 @@ class PlayerFactory{	//factory class that makes the players
 		void makePlayers(Farkle& game, ShouseAlgorithm& SA); // passes info to the farkle class
 		Player* makeHuman(){Player* temp=new Human();return temp;};
 		Player* makeDrewBot();
-		LizBot* makeLizBot(){Player* temp=new LizBot();return temp;};
-		ShouseBot* makeShouseBot();
+		Player* makeLizBot();
+		ShouseBot* makeShouseBot(){ShouseBot* temp=new ShouseBot();return temp;};
 };
 
 class Farkle{					//handles game logic, turn stuff, players and holds the genetic algorithm for the next round
