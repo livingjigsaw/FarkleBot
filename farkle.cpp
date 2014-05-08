@@ -26,7 +26,7 @@ void PlayerFactory::set_players(int inHuman, int inDrewBot, int inLizBot, int in
 }
 
 
-void PlayerFactory::makePlayers(Farkle& game){
+void PlayerFactory::makePlayers(Farkle& game, ShouseAlgorithm& SA){
 	int temp = numHuman+numDrewBot+numLizBot+numShouseBot;
 	game.numPlayers = temp;
 	game.Players = new Player*[temp];
@@ -39,43 +39,13 @@ void PlayerFactory::makePlayers(Farkle& game){
 	for(int i=numHuman+numDrewBot; i<numHuman+numDrewBot+numLizBot;i++){
 		game.Players[i]=makeLizBot();
 	}
-	for(int i=numHuman+numDrewBot+numLizBot; i<numPlayers;i++){
-		game.Players[i]=makeShouseBot();
+	*/for(int i=0; i<numShouseBot;i++){
+		SA.myBots[i]=makeShouseBot();
+		game.Players[i+numHuman+numDreBot+numLizBot]=SA.myBots[i];
 	}
-*/}
-
-/*  old AI functions, not used but may want the code for later
-
-bool Farkle::readAI(string filename){
-	fstream in;
-	in.open(filename.c_str(), ios::in);
-	if(in.fail())
-		return 0; 
-	double temp = 0;
-	in >> temp;
-	Players[numHumans+botID]->set_param(0, temp);
-	in >> temp;
-	Players[numHumans+botID]->set_param(1, temp);
-	in >> temp;
-	Players[numHumans+botID]->set_param(2, temp);
-	in >> temp;
-	Players[numHumans+botID]->set_param(3, temp);
-
-	return 1;
 }
 
-bool Farkle::storeAI(string filename, int botID){
-	fstream out;
-	out.open(filename.c_str(), ios::out);
-	if(out.fail())
-		return 0; 
-	out << Players[numHumans+botID]->get_param(0) << endl;
-	out << Players[numHumans+botID]->get_param(1) << endl;
-	out << Players[numHumans+botID]->get_param(2) << endl;
-	out << Players[numHumans+botID]->get_param(3) << endl;
-	return 1;
-}
-*/
+
 
 bool Farkle::saveResults(string filename){
 	fstream out;

@@ -1,5 +1,6 @@
 //functionality
 #include <ctime>
+#include <math.h>
 #include <cstdlib>
 #include <fstream>
 using namespace std;
@@ -91,9 +92,20 @@ class LizBot:FarkleBot{
 };
 
 class ShouseBot:FarkleBot{
-		public:
-		ShouseBot(){};
-		~ShouseBot(){};
+	private:
+		double* params;	
+		/*
+		param 1 weights num of dice
+		param 2 weights roll's score
+		param 3 weights turn score
+		param 4 weights leading opponent's score **not implementing this right now** this is difficult to do with current game's implementation! not passing in data from other players currently
+		*/
+	public:
+		ShouseBot(){params=new double [3];};
+		~ShouseBot(){delete [] params;};
+
+		double get_param(int paramID){return params[paramID];};
+
 		void chooseDice(const int* diceValues, bool& toHold, bool& keep);
 		void saveAI();
 		void readAI();
@@ -105,7 +117,7 @@ class ShouseBot:FarkleBot{
 
 			we should propogate next generation using numbers from multiple of the best bots from the previous game. 
 			to do so, we should find the average parameter values of these x best bots
-			then, we should also find the range of each parameter over x best bots
+			then, we should also find the range of each parameter over x botsest bots
 			next, propogate across range with higer percentage of bots within made closer to avg
 			
 			for example: we have 625 bots, and each parameter from the x best bots has an avg of 5, and a range of 4 (from 3 to 7)
@@ -116,6 +128,38 @@ class ShouseBot:FarkleBot{
 				params then made at avg - 2*step, avg - step, avg, avg+step, avg+2step
 			this puts 3 out of 5 children within 40% of the mean, quite close to forcing a gaussian distribution of children
 		*/
+};
+
+class ShouseAlgorithm{
+	friend class PlayerFactory;
+	private:
+		double numBots;	//might do math with this
+		int startIndex;	//this will be the index in Farkle where my bots begin
+		ShouseBot** myBots;
+	public:
+		ShouseAlgorithm(double inBots, int inIndex){numBots=inBots;startIndex=inIndex; myBots=new ShouseBot*[numBots];};
+		~ShouseAlgorithm(){delete [] myBots;};
+
+		Breed(){
+			double numMax = ceil(numBots/10); //determining how many bots to average, don't want non-int
+			double** max=new double[numMax];
+				for(int i=0;i<numMax;i++){
+					max[i]=new double[4];	// 1st is score, 2 3 4 are params
+				}
+				for(int i=0;i<numBots;i++){
+					double temp = myBots[i]->get_score();	// if score is greater than max score, save params from bot to array
+					if(max[0]<temp){
+						for(int i=numMax-1;i>0;i--){
+							max[i]=max[i-1];
+						}
+						max[0]=temp;
+					}
+				}
+				double avg =0;
+				for(int i=0;i<numMax;i++){
+					avg+=max[i];
+				}
+		};
 };
 
 class Farkle;
@@ -131,7 +175,7 @@ class PlayerFactory{	//factory class that makes the players
 		~PlayerFactory(){};
 
 		void set_players(int inHuman, int inDrewBot, int inLizBot, int inShouseBot);
-		void makePlayers(Farkle& game); // passes info to the farkle class
+		void makePlayers(Farkle& game, ShouseAlgorithm& SA); // passes info to the farkle class
 		Player* makeHuman(){Player* temp=new Human();return temp;};
 		Player* makeDrewBot();
 		LizBot* makeLizBot();

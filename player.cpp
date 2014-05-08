@@ -36,4 +36,35 @@ void Human::chooseDice(int rollResults[], bool hold[], bool& keepPoints){
 	}
 }
 
+/*  old AI functions, not used but may want the code for later
 
+bool Farkle::readAI(string filename){
+	fstream in;
+	in.open(filename.c_str(), ios::in);
+	if(in.fail())
+		return 0; 
+	double temp = 0;
+	in >> temp;
+	Players[numHumans+botID]->set_param(0, temp);
+	in >> temp;
+	Players[numHumans+botID]->set_param(1, temp);
+	in >> temp;
+	Players[numHumans+botID]->set_param(2, temp);
+	in >> temp;
+	Players[numHumans+botID]->set_param(3, temp);
+
+	return 1;
+}
+
+bool Farkle::storeAI(string filename, int botID){
+	fstream out;
+	out.open(filename.c_str(), ios::out);
+	if(out.fail())
+		return 0; 
+	out << Players[numHumans+botID]->get_param(0) << endl;
+	out << Players[numHumans+botID]->get_param(1) << endl;
+	out << Players[numHumans+botID]->get_param(2) << endl;
+	out << Players[numHumans+botID]->get_param(3) << endl;
+	return 1;
+}
+*/
