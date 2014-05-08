@@ -312,3 +312,15 @@ void Farkle::playHumans(){
 	}
 	cout << "Player " << winner+1 << "won the game!\n";
 }
+
+void Farkle::trainBots(int numTurns){
+	for(int i=0;i<numTurns;i++){
+			playRound(1);
+	}
+}
+
+void Farkle::reset(){
+	for(int i=0; i<numPlayers;i++){
+		Players[i]->resetScore();
+	}
+}

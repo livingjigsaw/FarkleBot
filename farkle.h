@@ -3,6 +3,7 @@
 #include <math.h>
 #include <cstdlib>
 #include <fstream>
+#include <iostream>
 using namespace std;
 
 class Die{			// should be complete 3/12
@@ -45,9 +46,10 @@ class Player{		//parent class for bots and humans
 		void addTurn(){turnsTaken++;};
 		//methods
 		void addPoints(int points){score=score+points;};
+		void resetScore(){score=0;};
 		int scoreRoll(int results[], bool hold[]);
 		bool validHold(int results[], bool hold[]);	// this makes sure the held dice are legitimate.
-		virtual void chooseDice(int* rollResults, bool* hold, bool& keepPoints, int turnScore){};	//humans and bots will do this differently
+		virtual void chooseDice(const int* rollResults, bool* hold, bool& keepPoints, int turnScore){cout<<"you failed\n";};	//humans and bots will do this differently
 
 
 };
@@ -57,7 +59,7 @@ class FarkleBot:public Player{
 		FarkleBot(){};
 		virtual ~FarkleBot(){};
 
-		virtual void chooseDice(const int* diceValues, bool* toHold, bool& keep, int turnScore){};	//this is where the decision of which dice the bot keeps, 0's in the array are not counted
+		virtual void chooseDice(const int* diceValues, bool* toHold, bool& keep, int turnScore){cout<<"you still fail!\n";};	//this is where the decision of which dice the bot keeps, 0's in the array are not counted
 		virtual void saveAI(){}; //writes ai to file
 		virtual void readAI(){}; //reads AI from file
 }; 
@@ -67,7 +69,7 @@ class Human:public Player{				// handles io for humans to play
 		Human(){};
 		~Human(){};
 
-		void chooseDice(int rollResults[], bool* hold, bool& keepPoints, int turnScore);	//humans and bots will do this differently
+		void chooseDice(const int rollResults[], bool* hold, bool& keepPoints, int turnScore);	//humans and bots will do this differently
 
 }; 
 
@@ -147,7 +149,9 @@ class ShouseAlgorithm{
 			int numMax = ceil(numBots/20); //determining how many bots to average, don't want non-int
 			double** max=new double*[numMax];
 			for(int i=0;i<numMax;i++){
-				max[i]=new double[4];	// 1st is score, 2 3 4 are params
+				max[i]=new double[4];
+				for(int j=0;j<4;j++)
+					max[i][j]=0;	// 1st is score, 2 3 4 are params
 			}
 			for(int i=0;i<numBots;i++){
 				double temp = myBots[i]->get_score();	// if score is greater than max score, save params from bot to array
@@ -164,6 +168,7 @@ class ShouseAlgorithm{
 					max[0][3]=myBots[i]->get_param(2);
 				}
 			}
+			cout << "the best bot's score = "<< max[0][0] << endl;
 			double avg[3]={};
 			for(int i=0;i<numMax;i++){
 				avg[0]+=max[i][1];
@@ -180,7 +185,6 @@ class ShouseAlgorithm{
 				myBots[i]->set_param(0, myBots[0]->get_param(0)+((rand()%40)/10.0)-2);
 				myBots[i]->set_param(1, myBots[0]->get_param(1)+((rand()%40)/10.0)-2);
 				myBots[i]->set_param(2, myBots[0]->get_param(2)+((rand()%40)/10.0)-2);
-
 			}
 		};
 };
@@ -225,6 +229,6 @@ class Farkle{					//handles game logic, turn stuff, players and holds the geneti
 		bool validHold(int results[], bool hold[]);	// this makes sure the held dice are legitimate.
 		int scoreRoll(int results[], bool hold[]);
 		void playHumans(); // a game with human players, with a final round
-		void trainBots();	// this game does not have a final round, it continues until x number of bots pass 10000
-		
+		void trainBots(int numTurns);	// this game does not have a final round, it continues until x number of turns
+		void reset();
 };	
