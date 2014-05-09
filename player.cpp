@@ -223,7 +223,7 @@ void ShouseBot::chooseDice(const int* diceValues, bool* toHold, bool& keep, int 
 	}
 	if(botScore[maxIndex] > turnScore*get_param(2)/100)
 			keep=true;
-		else
+	else
 			keep=false;
 		for(int i=0;i<6;i++){
 			toHold[i]=holdData[maxIndex][i];

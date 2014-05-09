@@ -154,6 +154,9 @@ void Farkle::finalRound(int startID){
 	while(current != startID){
 		playTurn(current, 0);	
 		Players[current]->addTurn();
+		current++;
+		if(current == numPlayers)
+			current=0;
 	}
 }
 
