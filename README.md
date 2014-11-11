@@ -1,12 +1,14 @@
 FarkleBot
 =========
 
-please commit and push to main dev branch, and only merge to master after testing code and proving that it works
+This was a project for an undergraduate Pattern Recognition class, where we were given freedom to select a learning algorithm and a problem to apply it to. 
 
-Previously,
-genetic algorithm parameters are weights applied to different factors that affect the decision to roll again. the factors are
+So, this project was to create a genetic algorithm that could play the dice game Farkle, and allow people to play against the bots.
 
-opponent's score / 10000
-maximum opponent's score - my score / 10000; the bigger, the riskier we'll be as we are farther behind
-number of dice left to roll/6
-current turn's score / 1000; 1000 was arbitrarily chosen, definitely up for discussion
+Currently, the system has a design that is rather extensible, but the implementation is still rudimentary, and has not been through much testing at all. It's written exclusively in C++, and can currently compile by including all the cpp files without additional libraries. 
+
+There are 40 bots per generation, the bot's score is determined by letting it play 20 turns, and the next generation is created by averaging the score from the top 5% of bots created, and forcing a "normal" distribution. The number being reported is the top bot's score, not the average.
+
+Initial analysis of results shows that the current genetic algorithm doesn't seem to be changing notably over time. Using more bots per generation seems to increase the lower bound and more extended generations may reveal more variation, but only having three parameters being weighed may not be creating diverse enough bevavior in the bots, and the parameters themselves may not be affecting them much. 
+
+In short, it's not much right now, needs refining for more definitive results, and playing against other people and bots is mostly untested.
