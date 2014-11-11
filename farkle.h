@@ -1,7 +1,9 @@
 //functionality
 #include <ctime>
+#include <math.h>
 #include <cstdlib>
 #include <fstream>
+#include <iostream>
 using namespace std;
 
 class Die{			// should be complete 3/12
@@ -44,23 +46,22 @@ class Player{		//parent class for bots and humans
 		void addTurn(){turnsTaken++;};
 		//methods
 		void addPoints(int points){score=score+points;};
-		virtual void chooseDice(int* rollResults, bool* hold, bool& keepPoints){};	//humans and bots will do this differently
-		virtual void set_inputs(int inputID, double in){};
-		virtual double get_inputs(int inputID){return 0;};
+		void resetScore(){score=0;};
+		int scoreRoll(int results[], bool hold[]);
+		bool validHold(int results[], bool hold[]);	// this makes sure the held dice are legitimate.
+		virtual void chooseDice(const int* rollResults, bool* hold, bool& keepPoints, int turnScore){cout<<"you failed\n";};	//humans and bots will do this differently
+
 
 };
 
-class FarkleBot:public Player{			//implements the ai behavior, stores parameters,
-	private:
-		double* inputs; // points to array of AI inputs
-
+class FarkleBot:public Player{
 	public:
-		FarkleBot(){inputs = new double[4]; inputs[0] = 0;inputs[1] = 0;inputs[2] = 0;inputs[3] = 0;};
-		~FarkleBot(){delete [] inputs;};
+		FarkleBot(){};
+		virtual ~FarkleBot(){};
 
-		virtual void chooseDice(int* diceValues, bool& toHold, bool& keep);	//this is where the decision of which dice the bot keeps, 0's in the array are not counted
-		virtual void saveAI(); //writes ai to file
-		virtual void readAI(); //reads AI from file
+		virtual void chooseDice(const int* diceValues, bool* toHold, bool& keep, int turnScore){cout<<"you still fail!\n";};	//this is where the decision of which dice the bot keeps, 0's in the array are not counted
+		virtual void saveAI(){}; //writes ai to file
+		virtual void readAI(){}; //reads AI from file
 }; 
 
 class Human:public Player{				// handles io for humans to play
@@ -68,19 +69,52 @@ class Human:public Player{				// handles io for humans to play
 		Human(){};
 		~Human(){};
 
-		void chooseDice(int rollResults[], bool hold[], bool& keepPoints);	//humans and bots will do this differently
+		void chooseDice(const int rollResults[], bool* hold, bool& keepPoints, int turnScore);	//humans and bots will do this differently
 
 }; 
 
-class DrewBot:FarkleBot{
-
+class DrewBot:public FarkleBot{
+	public:
+		DrewBot(){};
+		~DrewBot(){};
+		void chooseDice(const int* diceValues, bool* toHold, bool& keep, int turnScore);
+		void saveAI();
+		void readAI();
 };
 
-class LizBot:FarkleBot{
-
+class LizBot:public FarkleBot{
+	public:
+		LizBot(){};
+		~LizBot(){};
+		void chooseDice(const int* diceValues, bool* toHold, bool& keep, int turnScore);
+		void saveAI();
+		void readAI();
 };
 
-class ShouseBot:FarkleBot{
+class ShouseBot:public FarkleBot{
+	private:
+		double* params;	
+		/*
+		param 1 weights num of dice
+		param 2 weights roll's score
+		param 3 weights turn score
+		param 4 weights leading opponent's score **not implementing this right now** this is difficult to do with current game's implementation! not passing in data from other players currently
+		*/
+	public:
+		ShouseBot(){
+			params=new double [3];
+			params[0]=rand()%10;
+			params[1]=rand()%10;
+			params[2]=rand()%10;
+		};
+		~ShouseBot(){delete [] params;};
+
+		double get_param(int paramID){return params[paramID];};
+		void set_param(int paramID, double val){params[paramID]=val;};
+
+		void chooseDice(const int* diceValues, bool* toHold, bool& keep, int turnScore);
+		void saveAI(){};
+		void readAI(){};
 /*
 			here i define a complicated system for finding the next generation. 
 			I think this way would have a high chance of giving us very good results
@@ -89,7 +123,7 @@ class ShouseBot:FarkleBot{
 
 			we should propogate next generation using numbers from multiple of the best bots from the previous game. 
 			to do so, we should find the average parameter values of these x best bots
-			then, we should also find the range of each parameter over x best bots
+			then, we should also find the range of each parameter over x botsest bots
 			next, propogate across range with higer percentage of bots within made closer to avg
 			
 			for example: we have 625 bots, and each parameter from the x best bots has an avg of 5, and a range of 4 (from 3 to 7)
@@ -100,6 +134,59 @@ class ShouseBot:FarkleBot{
 				params then made at avg - 2*step, avg - step, avg, avg+step, avg+2step
 			this puts 3 out of 5 children within 40% of the mean, quite close to forcing a gaussian distribution of children
 		*/
+};
+
+class ShouseAlgorithm{
+	friend class PlayerFactory;
+	private:
+		int numBots;	//might do math with this
+		ShouseBot** myBots;
+	public:
+		ShouseAlgorithm(int inBots){numBots=inBots;myBots=new ShouseBot* [numBots];};
+		~ShouseAlgorithm(){delete [] myBots;};
+
+		void Breed(){
+			int numMax = ceil(numBots/20); //determining how many bots to average, don't want non-int
+			double** max=new double*[numMax];
+			for(int i=0;i<numMax;i++){
+				max[i]=new double[4];
+				for(int j=0;j<4;j++)
+					max[i][j]=0;	// 1st is score, 2 3 4 are params
+			}
+			for(int i=0;i<numBots;i++){
+				double temp = myBots[i]->get_score();	// if score is greater than max score, save params from bot to array
+				if(max[0][0]<temp){
+					for(int j=numMax-1;j>0;j--){
+						max[j][0]=max[j-1][0];
+						max[j][1]=max[j-1][1];
+						max[j][2]=max[j-1][2];
+						max[j][3]=max[j-1][3];
+					}
+					max[0][0]=temp;
+					max[0][1]=myBots[i]->get_param(0);
+					max[0][2]=myBots[i]->get_param(1);
+					max[0][3]=myBots[i]->get_param(2);
+				}
+			}
+			cout << "the best bot's score = "<< max[0][0] << endl;
+			double avg[3]={};
+			for(int i=0;i<numMax;i++){
+				avg[0]+=max[i][1];
+				avg[1]+=max[i][2];
+				avg[2]+=max[i][3];
+			}
+			avg[0]= avg[0]/numMax;
+			avg[1]= avg[1]/numMax;
+			avg[2]= avg[2]/numMax;
+			myBots[0]->set_param(0, avg[0]);
+			myBots[0]->set_param(1, avg[1]);
+			myBots[0]->set_param(2, avg[2]);
+			for(int i=1;i<numBots;i++){
+				myBots[i]->set_param(0, myBots[0]->get_param(0)+((rand()%40)/10.0)-2);
+				myBots[i]->set_param(1, myBots[0]->get_param(1)+((rand()%40)/10.0)-2);
+				myBots[i]->set_param(2, myBots[0]->get_param(2)+((rand()%40)/10.0)-2);
+			}
+		};
 };
 
 class Farkle;
@@ -115,11 +202,11 @@ class PlayerFactory{	//factory class that makes the players
 		~PlayerFactory(){};
 
 		void set_players(int inHuman, int inDrewBot, int inLizBot, int inShouseBot);
-		void makePlayers(Farkle& game); // passes info to the farkle class
+		void makePlayers(Farkle& game, ShouseAlgorithm& SA); // passes info to the farkle class
 		Player* makeHuman(){Player* temp=new Human();return temp;};
 		Player* makeDrewBot();
-		LizBot* makeLizBot();
-		ShouseBot* makeShouseBot();
+		Player* makeLizBot();
+		ShouseBot* makeShouseBot(){ShouseBot* temp=new ShouseBot();return temp;};
 };
 
 class Farkle{					//handles game logic, turn stuff, players and holds the genetic algorithm for the next round
@@ -139,8 +226,9 @@ class Farkle{					//handles game logic, turn stuff, players and holds the geneti
 		int playRound(bool isBotGame);	//if player saves score over 10000, go to final round by returning that player's ID, or -1 otherwise
 		void finalRound(int startID); 	//not used for bot training, as we want turns till 10000 and don't want turn order to skew results 
 		bool validRoll(int results[]);	// this checks a group of results to see if points were saved. really to make sure people didn't make a mistake
+		bool validHold(int results[], bool hold[]);	// this makes sure the held dice are legitimate.
 		int scoreRoll(int results[], bool hold[]);
 		void playHumans(); // a game with human players, with a final round
-		void trainBots();	// this game does not have a final round, it continues until x number of bots pass 10000
-		
+		void trainBots(int numTurns);	// this game does not have a final round, it continues until x number of turns
+		void reset();
 };	

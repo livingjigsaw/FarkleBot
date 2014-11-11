@@ -26,44 +26,29 @@ void PlayerFactory::set_players(int inHuman, int inDrewBot, int inLizBot, int in
 }
 
 
-void PlayerFactory::makePlayers(Farkle& game){
+void PlayerFactory::makePlayers(Farkle& game, ShouseAlgorithm& SA){
 	int temp = numHuman+numDrewBot+numLizBot+numShouseBot;
 	game.numPlayers = temp;
 	game.Players = new Player*[temp];
 	for(int i=0; i<numHuman;i++){
 		game.Players[i]=makeHuman();
 	}
-/*	for(int i=numHuman; i<numHuman+numDrewBot;i++){
+	/*for(int i=numHuman; i<numHuman+numDrewBot;i++){
 		game.Players[i]=makeDrewBot();
 	}
 	for(int i=numHuman+numDrewBot; i<numHuman+numDrewBot+numLizBot;i++){
 		game.Players[i]=makeLizBot();
+	}*/
+	for(int i=0; i<numShouseBot;i++){
+		SA.myBots[i]=makeShouseBot();
+		game.Players[i+numHuman+numDrewBot+numLizBot]=SA.myBots[i];
 	}
-	for(int i=numHuman+numDrewBot+numLizBot; i<numPlayers;i++){
-		game.Players[i]=makeShouseBot();
-	}
-*/}
-
-/*  old AI functions, not used but may want the code for later
-
-bool Farkle::readAI(string filename){
-	fstream in;
-	in.open(filename.c_str(), ios::in);
-	if(in.fail())
-		return 0; 
-	double temp = 0;
-	in >> temp;
-	Players[numHumans+botID]->set_param(0, temp);
-	in >> temp;
-	Players[numHumans+botID]->set_param(1, temp);
-	in >> temp;
-	Players[numHumans+botID]->set_param(2, temp);
-	in >> temp;
-	Players[numHumans+botID]->set_param(3, temp);
-
-	return 1;
 }
 
+/*
+
+
+=======
 bool Farkle::storeAI(string filename, int botID){
 	fstream out;
 	out.open(filename.c_str(), ios::out);
@@ -76,7 +61,7 @@ bool Farkle::storeAI(string filename, int botID){
 	return 1;
 }
 */
-
+//this is a demonstration
 bool Farkle::saveResults(string filename){
 	fstream out;
 	out.open(filename.c_str(), ios::out);
@@ -87,7 +72,7 @@ bool Farkle::saveResults(string filename){
 		out << "Score= " << Players[i]->get_score() << endl;
 		out << "Turns= " << Players[i]->get_turnsTaken() << endl;
 	}
-	return 1;
+	return 1; 
 }
 
 void Farkle::playTurn(int playerID, bool isBotGame){
@@ -104,10 +89,16 @@ void Farkle::playTurn(int playerID, bool isBotGame){
 				results[i]= Dice[i].get_value();
 			}
 		}
-		bool hold[6]={0};
+		bool hold[6]={};
 		bool keepPoints = 0;
 		if(validRoll(results)){
-			Players[playerID]->chooseDice(results, hold, keepPoints);
+			bool holdIsValid=0;
+			while(!holdIsValid){
+				Players[playerID]->chooseDice(results, hold, keepPoints, turnScore);
+				holdIsValid=validHold(results, hold);
+				if(!holdIsValid)
+					cout <<"\nYou need to choose valid dice to hold! Try again!\n\n";
+			}
 			turnScore += scoreRoll(results, hold);
 			int numHeld = 0;
 			for(int i=0;i<6;i++)
@@ -163,6 +154,9 @@ void Farkle::finalRound(int startID){
 	while(current != startID){
 		playTurn(current, 0);	
 		Players[current]->addTurn();
+		current++;
+		if(current == numPlayers)
+			current=0;
 	}
 }
 
@@ -188,6 +182,60 @@ bool Farkle::validRoll(int results[]){
 		return 0;//FARKLE!
 }
 
+bool Farkle::validHold(int results[], bool held[]){
+	int tally[6]={0};
+	bool validDice[6]={0};
+	for(int i=0;i<6;i++){
+		if(results[i]!=0){
+			if(held[i]){
+				tally[results[i]-1]++;//only tally the dice that are held
+
+			}
+			else
+				validDice[i]=1; //any dice not being held can't affect the hold
+		}
+		else{
+			validDice[i]=1; //any dice not being rolled cannot make the choice invalid
+		}
+	}
+	int numQuads =0;
+	int numPairs=0;
+	for(int i=0;i<6;i++){
+		if(tally[i]==4)
+			numQuads++;
+		if(tally[i]==2)
+			numPairs++;
+	}
+
+	if((tally[0]==1&&tally[1]==1&&tally[2]==1&&tally[3]==1&&tally[4]==1&&tally[5]==1)||(numPairs==3)||(numQuads==1&&numPairs==1)){
+		validDice[0]=1;
+		validDice[1]=1;
+		validDice[2]=1;
+		validDice[3]=1;
+		validDice[4]=1;
+		validDice[5]=1;
+	}
+
+	for(int i=0;i<6;i++){
+		if(tally[i]>=3){
+			for(int j=0;j<6;j++){
+				if(Dice[j].get_value()-1 == i)
+					validDice[j]=1;
+			}
+		}
+		if(Dice[i].get_value()==1 || Dice[i].get_value()==5)
+			validDice[i]=1;
+	}
+
+	for(int i=0;i<6;i++){
+		if(validDice[i]!=1)
+			return false;
+	}
+
+	return true;
+
+}
+ 
 int Farkle::scoreRoll(int results[], bool hold[]){
 	int score=0;
 	int tally[6]={0};
@@ -266,4 +314,16 @@ void Farkle::playHumans(){
 			winner = i;	
 	}
 	cout << "Player " << winner+1 << "won the game!\n";
+}
+
+void Farkle::trainBots(int numTurns){
+	for(int i=0;i<numTurns;i++){
+			playRound(1);
+	}
+}
+
+void Farkle::reset(){
+	for(int i=0; i<numPlayers;i++){
+		Players[i]->resetScore();
+	}
 }
